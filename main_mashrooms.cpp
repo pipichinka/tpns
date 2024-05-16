@@ -57,7 +57,7 @@ void count_roc(perceptron& p, std::vector<nc::NdArray<double>>& in_data, std::ve
     std::vector<double> tpr_vector;
     std::vector<double> fpr_vector;
     
-    for (double threshold = -0.05; threshold <= 1.0; threshold += 0.05){
+    for (double threshold = -0.05; threshold <= 1.5; threshold += 0.05){
         nc::NdArray<int> tp = nc::zeros<int>(out_data[0].shape());
         nc::NdArray<int> tn = tp;
         nc::NdArray<int> fp = tp;
