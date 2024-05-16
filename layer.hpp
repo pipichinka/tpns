@@ -1,26 +1,65 @@
 #include "NumCpp.hpp"
 #include <algorithm>
-//relu
 
 class actrivation_relu{
 public:
-    double inline operator()(double x){
-        return std::max(0.0, x);
+    static nc::NdArray<double> inline forward(const nc::NdArray<double>& x){
+        nc::NdArray<double> res = x;
+        nc::applyFunction(res, std::function([](double v) -> double {return std::max(0.0, v);}));
+        return res;
     }
 
-    double inline derivative(double x){
-        return x >= 0.0 ? 1.0:0.0;
+    static nc::NdArray<double> inline derivative(const nc::NdArray<double>& x){
+        nc::NdArray<double> res = x;
+        nc::applyFunction(res, std::function([](double v) -> double {return v >= 0 ? 1.0:0.0;}));
+        return res;
     }
 };
 
 class activation_x{
 public:
-    double inline operator()(double x){
+    static nc::NdArray<double> inline forward(const nc::NdArray<double>& x){
         return x;
     }
 
-    double inline derivative(double x){
-        return 1;
+    static nc::NdArray<double> inline derivative(const nc::NdArray<double>& x){
+        nc::NdArray<double> res(x.shape());
+        res.ones();
+        return res;
+    }
+};
+
+
+class activation_softmax{
+public:
+    static nc::NdArray<double> inline forward(const nc::NdArray<double>& x){
+        nc::NdArray<double> exp = nc::exp(x);
+        double sum = exp.sum(nc::Axis::NONE)(0,0);
+        nc::applyFunction(exp, std::function([sum](double v) -> double {return v / sum;}));
+        return exp;
+    }
+
+    static nc::NdArray<double> inline derivative(const nc::NdArray<double>& x){
+        // nc::NdArray<double> res = x;
+        // nc::applyFunction(res, std::function([](double v) -> double {return v * (1.0 - v);}));
+        // return res;
+        return x;
+    }
+};
+
+
+class activation_sigmoid{
+public:
+    static nc::NdArray<double> inline forward(const nc::NdArray<double>& x){
+        nc::NdArray<double> exp = nc::exp(-x);
+        nc::applyFunction(exp, std::function([](double v) -> double {return 1.0 / (1.0 + v);}));
+        return exp;
+    }
+
+    static nc::NdArray<double> inline derivative(const nc::NdArray<double>& x){
+        nc::NdArray<double> res = nc::exp(-x);
+        nc::applyFunction(res, std::function([](double v) -> double {return v / ((1 + v) * (1 + v));}));
+        return res;
     }
 };
 
@@ -48,23 +87,18 @@ public:
     }
     //x 1Xin
     virtual nc::NdArray<double> forward(const nc::NdArray<double>& x){
-        activation a;
         this->x = x;
         nc::NdArray<double> res = nc::dot(x, W) + b; // (1Xin * inXout) + 1Xout
         t = res; // 1Xout
-        for (auto it = res.begin(); it != res.end(); ++it){
-            *(it) = a(*(it));
-        }
+        res = activation::forward(res);
         return res;
     }
 
     
     //error 1xout
     virtual nc::NdArray<double> backward(const nc::NdArray<double> error, double learn_rate){
-        activation a;
-        for (auto it = t.begin(); it != t.end(); ++it){
-            *it = a.derivative(*it);
-        }
+
+        t = activation::derivative(t);
         nc::NdArray<double> dt = error * t; // 1xout
         nc::NdArray<double> dx = nc::dot(dt, W.transpose()); //1Xout * outXin
         b -= learn_rate * dt;
