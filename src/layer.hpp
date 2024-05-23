@@ -1,7 +1,21 @@
 #include "NumCpp.hpp"
 #include <algorithm>
+#ifndef LAYER_H
+#define LAYER_H
 
-class actrivation_relu{
+class activation_tanh{
+public:
+    static nc::NdArray<double> inline forward(const nc::NdArray<double>& x){
+        return 2.0 / (1.0 + nc::exp(-2.0 * x)) - 1.0;
+    }
+
+    static nc::NdArray<double> inline derivative(const nc::NdArray<double>& x){
+        return 1.0 - nc::square(x);
+    }
+};
+
+
+class activation_relu{
 public:
     static nc::NdArray<double> inline forward(const nc::NdArray<double>& x){
         nc::NdArray<double> res = x;
@@ -33,17 +47,12 @@ public:
 class activation_softmax{
 public:
     static nc::NdArray<double> inline forward(const nc::NdArray<double>& x){
-        nc::NdArray<double> exp = nc::exp(x);
-        double sum = exp.sum(nc::Axis::NONE)(0,0);
-        nc::applyFunction(exp, std::function([sum](double v) -> double {return v / sum;}));
-        return exp;
+        nc::NdArray<double> exp = nc::exp(x - nc::max(x)(0,0));      
+        return exp / exp.sum()(0,0);
     }
 
     static nc::NdArray<double> inline derivative(const nc::NdArray<double>& x){
-        // nc::NdArray<double> res = x;
-        // nc::applyFunction(res, std::function([](double v) -> double {return v * (1.0 - v);}));
-        // return res;
-        return x;
+        return nc::ones<double>(x.shape());
     }
 };
 
@@ -57,9 +66,7 @@ public:
     }
 
     static nc::NdArray<double> inline derivative(const nc::NdArray<double>& x){
-        nc::NdArray<double> res = nc::exp(-x);
-        nc::applyFunction(res, std::function([](double v) -> double {return v / ((1 + v) * (1 + v));}));
-        return res;
+        return x * (1.0 - x);
     }
 };
 
@@ -106,3 +113,5 @@ public:
         return dx;
     }
 };
+
+#endif

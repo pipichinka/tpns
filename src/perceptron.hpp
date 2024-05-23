@@ -24,8 +24,8 @@ class evclid_error_counter: public error_counter_interface{
 
 class category_cross_entropy_error_counter: public error_counter_interface{
     virtual nc::NdArray<double> count(const nc::NdArray<double>& a, const nc::NdArray<double>& b){
-        auto a_clip = a.clip(1e-15, 1 - 1e-15);
-        return (a_clip - b) / (double) a.shape().cols;
+        auto a_clipped = a.clip(1e-15, 1.0 - 1e-15);
+        return -b * nc::log2(a_clipped);
     }
 };
 

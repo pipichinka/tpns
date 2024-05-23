@@ -34,12 +34,12 @@ std::vector<int> transform_s_to_i_vec(const std::vector<std::string>& in){
 std::vector<layer_interface*> make_layers(const std::vector<int> in_layers, int train_layer_size, int target_layer_size){
     std::vector<layer_interface*> res;
     if (in_layers.size() == 0){
-        res.emplace_back(new layer<actrivation_relu>(train_layer_size, target_layer_size));
+        res.emplace_back(new layer<activation_relu>(train_layer_size, target_layer_size));
         return res;
     }
-    res.emplace_back(new layer<actrivation_relu>(train_layer_size, in_layers[0]));
+    res.emplace_back(new layer<activation_relu>(train_layer_size, in_layers[0]));
     for (int i = 0; i < in_layers.size() - 1; i++){
-        res.emplace_back(new layer<actrivation_relu>(in_layers[i], in_layers[i + 1]));
+        res.emplace_back(new layer<activation_relu>(in_layers[i], in_layers[i + 1]));
     }
     res.emplace_back(new layer<activation_x>(in_layers.back(), target_layer_size));
     return res;

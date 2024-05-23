@@ -1,6 +1,7 @@
 #include <NumCpp.hpp>
 #include "csv.hpp"
 #include "perceptron.hpp"
+#include "rnn_layer.hpp"
 
 std::vector<std::string> parse_in_comma_sep(char* in){
     std::vector<std::string> result;
@@ -31,9 +32,9 @@ std::vector<layer_interface*> make_layers(const std::vector<int> in_layers, int 
         res.emplace_back(new layer<activation_sigmoid>(train_layer_size, target_layer_size));
         return res;
     }
-    res.emplace_back(new layer<actrivation_relu>(train_layer_size, in_layers[0]));
+    res.emplace_back(new layer<activation_relu>(train_layer_size, in_layers[0]));
     for (int i = 0; i < in_layers.size() - 1; i++){
-        res.emplace_back(new layer<actrivation_relu>(in_layers[i], in_layers[i + 1]));
+        res.emplace_back(new layer<activation_relu>(in_layers[i], in_layers[i + 1]));
     }
     res.emplace_back(new layer<activation_softmax>(in_layers.back(), target_layer_size));
     return res;

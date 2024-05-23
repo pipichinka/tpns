@@ -1,9 +1,9 @@
-#include "NumCpp.hpp"
+#include <NumCpp.hpp>
 
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-
+#include <vector>
 
 
 class csv{
@@ -17,8 +17,8 @@ public:
         if (in_file.bad()){
             throw std::runtime_error("can't open file");
         }
-        char line[1024];
-        in_file.getline(line, 1023);
+        char line[20000];
+        in_file.getline(line, 19999);
         char* current_line_start = line;
         char* line_end = line + strlen(line);
         while (current_line_start < line_end){
@@ -29,7 +29,7 @@ public:
         }
 
         while (!in_file.eof()){
-            in_file.getline(line, 1023);
+            in_file.getline(line, 19999);
             char* current_line_start = line;
             std::vector<double> current_iteration_vector;
             char* line_end = line + strlen(line);
